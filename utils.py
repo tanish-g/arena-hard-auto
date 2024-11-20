@@ -131,11 +131,16 @@ def chat_completion_openai(model, messages, temperature, max_tokens, api_dict=No
 def chat_completion_openai_azure(model, messages, temperature, max_tokens, api_dict=None):
     import openai
     from openai import AzureOpenAI
-
+    from azure.identity import ManagedIdentityCredential, get_bearer_token_provider 
+    
+    scope = "https://cognitiveservices.azure.com/.default"
+    client_id = "258f6dab-3e80-4254-83e3-bfb24a9ae8d9" #This is the current EAI ID
+ 
+    token_provider = get_bearer_token_provider(ManagedIdentityCredential(client_id=client_id), scope)
     api_base = api_dict["api_base"]
     client = AzureOpenAI(
         azure_endpoint = api_base,
-        api_key= api_dict["api_key"],
+        azure_ad_token_provider=token_provider,  
         api_version=api_dict["api_version"],
         timeout=240,
         max_retries=2
